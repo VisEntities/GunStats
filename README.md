@@ -2,6 +2,10 @@ This plugin keeps track of every kill, shot fired, and successful hit you make w
 
 [Demonstration](https://youtu.be/JdCRLoBEd9E)
 
+-------------
+
+## Screenshots
+
 ![](https://i.ibb.co/Qp48Jk9/Group-1056.png)
 
 -------------

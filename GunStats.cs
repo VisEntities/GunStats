@@ -10,7 +10,7 @@ using System.Collections.Generic;
 namespace Oxide.Plugins
 {
     [Info("Gun Stats", "VisEntities", "2.0.0")]
-    [Description("Keeps track of your performance with weapons.")]
+    [Description("Tracks your weapon use history, including kills and hits, and displays it on the weapon itself.")]
 
     public class GunStats : RustPlugin
     {

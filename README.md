@@ -1,4 +1,4 @@
-This plugin keeps track of every kill, shot fired, and successful hit you make with a weapon throughout its lifespan, displaying them right in its name.
+This plugin keeps track of every kill, shot fired, and successful hit you make with a weapon throughout its lifespan, storing and displaying  this information right in its name.
 
 [Demonstration](https://youtu.be/JdCRLoBEd9E)
 

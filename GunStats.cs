@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 
 /*
@@ -9,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Oxide.Plugins
 {
-    [Info("Gun Stats", "VisEntities", "2.0.0")]
+    [Info("Gun Stats", "VisEntities", "2.1.0")]
     [Description("Keeps track of your performance with weapons.")]
 
     public class GunStats : RustPlugin
@@ -31,6 +30,9 @@ namespace Oxide.Plugins
 
             [JsonProperty("Weapon Name Format")]
             public string WeaponNameFormat { get; set; }
+
+            [JsonProperty("Include NPC In Stats")]
+            public bool IncludeNPCInStats { get; set; }
         }
 
         protected override void LoadConfig()
@@ -63,6 +65,11 @@ namespace Oxide.Plugins
             if (string.Compare(_config.Version, "1.0.0") < 0)
                 _config = defaultConfig;
 
+            if (string.Compare(_config.Version, "2.1.0") < 0)
+            {
+                _config.IncludeNPCInStats = defaultConfig.IncludeNPCInStats;
+            }
+
             PrintWarning("Config update complete! Updated from version " + _config.Version + " to " + Version.ToString());
             _config.Version = Version.ToString();
         }
@@ -72,7 +79,8 @@ namespace Oxide.Plugins
             return new Configuration
             {
                 Version = Version.ToString(),
-                WeaponNameFormat = "{weaponName}\nKills: {kills}, Hits: {shotsHit}, Shots: {shotsFired}"
+                WeaponNameFormat = "{weaponName}\nKills: {kills}, Hits: {shotsHit}, Shots: {shotsFired}",
+                IncludeNPCInStats = false
             };
         }
 
@@ -105,7 +113,7 @@ namespace Oxide.Plugins
 
         private void OnPlayerDeath(BasePlayer victim, HitInfo hitInfo)
         {
-            if (hitInfo == null || victim == null || victim.IsNpc)
+            if (hitInfo == null || victim == null)
                 return;
 
             BasePlayer killer = hitInfo.InitiatorPlayer;
@@ -120,6 +128,9 @@ namespace Oxide.Plugins
 
             Item item = killer.GetActiveItem();
             if (item == null)
+                return;
+
+            if (!_config.IncludeNPCInStats && victim.IsNpc)
                 return;
 
             UpdateWeaponStats(item, addKills: 1);
@@ -142,7 +153,7 @@ namespace Oxide.Plugins
 
         private void OnEntityTakeDamage(BasePlayer player, HitInfo hitInfo)
         {
-            if (hitInfo == null || player == null || player.IsNpc)
+            if (hitInfo == null || player == null)
                 return;
 
             BasePlayer killer = hitInfo.InitiatorPlayer;
@@ -157,6 +168,9 @@ namespace Oxide.Plugins
 
             Item item = killer.GetActiveItem();
             if (item == null)
+                return;
+
+            if (!_config.IncludeNPCInStats && player.IsNpc)
                 return;
 
             UpdateWeaponStats(item, addShotsHit: 1);

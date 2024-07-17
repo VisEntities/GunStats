@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Oxide.Plugins
 {
-    [Info("Gun Stats", "VisEntities", "2.1.0")]
+    [Info("Gun Stats", "VisEntities", "2.2.0")]
     [Description("Tracks your weapon use history, including kills and hits, and displays it on the weapon name.")]
 
     public class GunStats : RustPlugin
@@ -33,6 +33,9 @@ namespace Oxide.Plugins
 
             [JsonProperty("Include NPC In Stats")]
             public bool IncludeNPCInStats { get; set; }
+
+            [JsonProperty("Excluded Item Short Names")] 
+            public List<string> ExcludedItemShortNames { get; set; }
         }
 
         protected override void LoadConfig()
@@ -70,6 +73,11 @@ namespace Oxide.Plugins
                 _config.IncludeNPCInStats = defaultConfig.IncludeNPCInStats;
             }
 
+            if (string.Compare(_config.Version, "2.2.0") < 0)
+            {
+                _config.ExcludedItemShortNames = defaultConfig.ExcludedItemShortNames;
+            }
+
             PrintWarning("Config update complete! Updated from version " + _config.Version + " to " + Version.ToString());
             _config.Version = Version.ToString();
         }
@@ -80,7 +88,14 @@ namespace Oxide.Plugins
             {
                 Version = Version.ToString(),
                 WeaponNameFormat = "{weaponName}\nKills: {kills}, Hits: {shotsHit}, Shots: {shotsFired}",
-                IncludeNPCInStats = false
+                IncludeNPCInStats = false,
+                ExcludedItemShortNames = new List<string>()
+                {
+                    "explosive.timed",
+                    "explosive.satchel",
+                    "grenade.f1",
+                    "grenade.beancan"
+                }
             };
         }
 
@@ -127,7 +142,7 @@ namespace Oxide.Plugins
                 return;
 
             Item item = killer.GetActiveItem();
-            if (item == null)
+            if (item == null || _config.ExcludedItemShortNames.Contains(item.info.shortname))
                 return;
 
             if (!_config.IncludeNPCInStats && victim.IsNpc)
@@ -145,7 +160,7 @@ namespace Oxide.Plugins
                 return;
 
             Item item = projectile.GetItem();
-            if (item == null)
+            if (item == null || _config.ExcludedItemShortNames.Contains(item.info.shortname))
                 return;
 
             UpdateWeaponStats(item, addShotsFired: 1);
@@ -167,7 +182,7 @@ namespace Oxide.Plugins
                 return;
 
             Item item = killer.GetActiveItem();
-            if (item == null)
+            if (item == null || _config.ExcludedItemShortNames.Contains(item.info.shortname))
                 return;
 
             if (!_config.IncludeNPCInStats && player.IsNpc)
